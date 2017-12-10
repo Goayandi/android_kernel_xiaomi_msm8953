@@ -1552,7 +1552,7 @@ int probe_common(struct i2c_client *i2c, struct max98927_priv *max98927) {
 		}
 	}
 
-	if ((ret_l != 0) && (ret_r != 0)) {
+	if ((ret_l != 0) && (max98927->mono_stereo && (ret_r != 0))) {
 		pr_err("max98927 i2c connection error ret_l: %d ret_r:%d\n", ret_l, ret_r);
 		return ret_l;
 	}
@@ -1606,7 +1606,11 @@ static int max98927_i2c_probe(struct i2c_client *i2c,
 			gpio_free(max98927->reset_gpio);
 			return ret;
 		}
+		// Properly initialize I2C comms
+		gpio_direction_output(max98927->reset_gpio, 0);
+		msleep(10);
 		gpio_direction_output(max98927->reset_gpio, 1);
+		msleep(5);
 
 	}
 	i2c_set_clientdata(i2c, max98927);
